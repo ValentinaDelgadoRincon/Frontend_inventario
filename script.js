@@ -319,29 +319,6 @@ function limpiarBusqueda() {
   showMessage("Búsqueda limpiada.", "info");
 }
 
-//Configuracion del sistema
-async function validarIntegridad() {
-  const resultDiv = document.getElementById("configResults");
-  try {
-    const [prodRes, movRes] = await Promise.all([
-      fetch(`${API_URL}/productos`),
-      fetch(`${API_URL}/movimientos`),
-    ]);
-    const productos = await prodRes.json();
-    const inconsistencias = productos.filter((p) => p.stockActual < 0);
-
-    if (inconsistencias.length > 0) {
-      resultDiv.innerHTML = `<p class="error">${inconsistencias.length} productos con stock negativo.</p>`;
-      showMessage("Inconsistencias detectadas.", "warning");
-    } else {
-      resultDiv.innerHTML = `<p class="success">✔️ Integridad validada correctamente.</p>`;
-      showMessage("Integridad del sistema validada.", "success");
-    }
-  } catch (error) {
-    showMessage("Error al validar integridad.", "error");
-    console.error(error);
-  }
-}
 
 function inicializarSistema() {
   showMessage("Sistema inicializado correctamente.", "success");
