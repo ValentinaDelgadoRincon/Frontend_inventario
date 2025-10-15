@@ -1,311 +1,175 @@
-// ===================== Inicialización =====================
-function initializeApp() {
-  console.log("Inventario Front iniciado");
-  loadUnidadYGrupos();
-  loadDashboard();
-}
-
-// ===================== Navegación =====================
-function showTab(tabId) {
-  document.querySelectorAll(".tab-content").forEach((tab) => {
-    tab.classList.remove("active");
-  });
-  document.getElementById(tabId).classList.add("active");
-
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    link.classList.remove("active");
-  });
-  document
-    .querySelector(`.nav-link[onclick="showTab('${tabId}')"]`)
-    .classList.add("active");
-}
-
-// ===================== Backend Config =====================
-const BASE_URL = "http://localhost:3000"; // Cambiar al endpoint de tu backend
-
-// ===================== PRODUCTOS =====================
-async function loadUnidadYGrupos() {
-  try {
-    const resUnidad = await fetch(`${BASE_URL}/unidades`);
-    const unidades = await resUnidad.json();
-    const unidadSelect = document.getElementById("unidadProd");
-    unidadSelect.innerHTML = "";
-    unidades.forEach((u) => {
-      unidadSelect.innerHTML += `<option value="${u.id}">${u.nombre}</option>`;
-    });
-
-    const resGrupo = await fetch(`${BASE_URL}/grupos`);
-    const grupos = await resGrupo.json();
-    const grupoSelect = document.getElementById("grupoProd");
-    grupoSelect.innerHTML = "";
-    grupos.forEach((g) => {
-      grupoSelect.innerHTML += `<option value="${g.id}">${g.nombre}</option>`;
-    });
-  } catch (err) {
-    console.error("Error cargando unidades y grupos:", err);
-  }
-}
+const API_URL = "http://localhost:3000/api"; 
 
 async function registrarProducto(event) {
   event.preventDefault();
+
   const producto = {
     codigo: document.getElementById("codigoProd").value.trim(),
     nombre: document.getElementById("nombreProd").value.trim(),
-    unidad: document.getElementById("unidadProd").value,
-    grupo: document.getElementById("grupoProd").value,
-    stockMin: parseFloat(document.getElementById("stockMinProd").value) || 0,
+    stockMinimo: Number(document.getElementById("stockMinProd").value) || 0,
   };
 
   try {
-    const res = await fetch(`${BASE_URL}/productos`, {
+    const res = await fetch(`${API_URL}/productos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(producto),
     });
+
     const data = await res.json();
-    document.getElementById("msgProd").innerText =
-      data.mensaje || "Producto registrado!";
-    limpiarFormProducto();
-    mostrarStock();
-  } catch (err) {
-    document.getElementById("msgProd").innerText =
-      "Error al registrar producto.";
-    console.error(err);
+
+    if (res.ok) {
+      document.getElementById(
+        "msgProd"
+      ).innerHTML = `<div class="message success">Producto registrado correctamente</div>`;
+      document.getElementById("formProducto").reset();
+    } else {
+      document.getElementById(
+        "msgProd"
+      ).innerHTML = `<div class="message error">${data.message}</div>`;
+    }
+  } catch (error) {
+    document.getElementById(
+      "msgProd"
+    ).innerHTML = `<div class="message error">Error al registrar producto</div>`;
   }
 }
 
-function limpiarFormProducto() {
-  document.getElementById("formProducto").reset();
-  document.getElementById("msgProd").innerText = "";
-}
-
-// ===================== MOVIMIENTOS =====================
 async function registrarMovimiento(event) {
   event.preventDefault();
+
   const movimiento = {
     codigo: document.getElementById("codigoMov").value.trim(),
     fecha: document.getElementById("fechaMov").value,
     tipo: document.getElementById("tipoMov").value,
-    cantidad: parseFloat(document.getElementById("cantMov").value),
+    cantidad: Number(document.getElementById("cantMov").value),
     observaciones: document.getElementById("obsMov").value.trim(),
   };
 
   try {
-    const res = await fetch(`${BASE_URL}/movimientos`, {
+    const res = await fetch(`${API_URL}/movimientos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(movimiento),
     });
+
     const data = await res.json();
-    document.getElementById("msgMov").innerText =
-      data.mensaje || "Movimiento registrado!";
-    limpiarFormMovimiento();
-    mostrarStock();
-  } catch (err) {
-    document.getElementById("msgMov").innerText =
-      "Error al registrar movimiento.";
-    console.error(err);
+
+    if (res.ok) {
+      document.getElementById(
+        "msgMov"
+      ).innerHTML = `<div class="message success">Movimiento registrado</div>`;
+      document.getElementById("formMovimiento").reset();
+      mostrarStock(); 
+    } else {
+      document.getElementById(
+        "msgMov"
+      ).innerHTML = `<div class="message error">${data.message}</div>`;
+    }
+  } catch (error) {
+    document.getElementById(
+      "msgMov"
+    ).innerHTML = `<div class="message error">Error al registrar movimiento</div>`;
   }
 }
 
-function limpiarFormMovimiento() {
-  document.getElementById("formMovimiento").reset();
-  document.getElementById("msgMov").innerText = "";
-}
-
-// ===================== STOCK =====================
 async function mostrarStock() {
-  const container = document.getElementById("stockTable");
-  container.innerHTML = "Cargando inventario...";
+  const stockDiv = document.getElementById("stockTable");
+  const loading = document.getElementById("loading");
+  loading.style.display = "block";
+
   try {
-    const res = await fetch(`${BASE_URL}/inventario`);
-    const stock = await res.json();
+    const res = await fetch(`${API_URL}/inventario`);
+    const productos = await res.json();
 
-    let html = `<table>
-      <thead>
-        <tr>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Grupo</th>
-          <th>Unidad</th>
-          <th>Stock Actual</th>
-          <th>Stock Mínimo</th>
-        </tr>
-      </thead>
-      <tbody>`;
-    stock.forEach((p) => {
-      html += `<tr>
-        <td>${p.codigo}</td>
-        <td>${p.nombre}</td>
-        <td>${p.grupo}</td>
-        <td>${p.unidad}</td>
-        <td>${p.stock}</td>
-        <td>${p.stockMin}</td>
-      </tr>`;
-    });
-    html += "</tbody></table>";
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = "Error cargando inventario.";
-    console.error(err);
-  }
-}
+    if (!res.ok) throw new Error(productos.message);
 
-function mostrarAlertas() {
-  const container = document.getElementById("stockTable");
-  const rows = Array.from(container.querySelectorAll("tbody tr"));
-  rows.forEach((row) => {
-    const stock = parseFloat(row.children[4].innerText);
-    const stockMin = parseFloat(row.children[5].innerText);
-    if (stock > stockMin) row.style.display = "none";
-    else row.style.backgroundColor = "#f8d7da";
-  });
-}
-
-// ===================== DASHBOARD =====================
-async function loadDashboard() {
-  const container = document.getElementById("statsGrid");
-  container.innerHTML = "Cargando dashboard...";
-  try {
-    const res = await fetch(`${BASE_URL}/dashboard`);
-    const data = await res.json();
-    container.innerHTML = `
-      <div class="stat-card">
-        <h3>Total Productos</h3>
-        <p>${data.totalProductos}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Movimientos Hoy</h3>
-        <p>${data.movimientosHoy}</p>
-      </div>
-      <div class="stat-card">
-        <h3>Stock Crítico</h3>
-        <p>${data.stockCritico}</p>
-      </div>
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Stock</th>
+            <th>Stock Mínimo</th>
+            <th>Estado</th>
+          </tr>
+        </thead>
+        <tbody>
     `;
-  } catch (err) {
-    container.innerHTML = "Error cargando dashboard.";
-    console.error(err);
-  }
-}
 
-function showStockAlerts() {
-  document.getElementById("alertsContainer").innerHTML =
-    "Función de alertas en construcción...";
-}
+    productos.forEach((p) => {
+      let statusClass = "status-normal";
+      let statusText = "Normal";
 
-// ===================== HISTORIAL =====================
-async function mostrarHistorial() {
-  const desde = document.getElementById("fechaDesde").value;
-  const hasta = document.getElementById("fechaHasta").value;
-  const tipo = document.getElementById("filtroTipo").value;
+      if (p.stock === 0) {
+        statusClass = "status-zero";
+        statusText = "Agotado";
+      } else if (p.stock <= p.stockMinimo) {
+        statusClass = "status-low";
+        statusText = "Bajo stock";
+      }
 
-  const container = document.getElementById("historialTable");
-  container.innerHTML = "Cargando historial...";
-  try {
-    const res = await fetch(
-      `${BASE_URL}/movimientos?desde=${desde}&hasta=${hasta}&tipo=${tipo}`
-    );
-    const movimientos = await res.json();
-
-    let html = `<table>
-      <thead>
-        <tr>
-          <th>Fecha</th>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Tipo</th>
-          <th>Cantidad</th>
-          <th>Observaciones</th>
+      html += `
+        <tr class="${statusClass}">
+          <td>${p.codigo}</td>
+          <td>${p.nombre}</td>
+          <td>${p.stock}</td>
+          <td>${p.stockMinimo}</td>
+          <td>${statusText}</td>
         </tr>
-      </thead>
-      <tbody>`;
-    movimientos.forEach((m) => {
-      html += `<tr>
-        <td>${m.fecha}</td>
-        <td>${m.codigo}</td>
-        <td>${m.nombre}</td>
-        <td>${m.tipo}</td>
-        <td>${m.cantidad}</td>
-        <td>${m.observaciones || ""}</td>
-      </tr>`;
+      `;
     });
+
     html += "</tbody></table>";
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = "Error cargando historial.";
-    console.error(err);
+    stockDiv.innerHTML = html;
+  } catch (error) {
+    stockDiv.innerHTML = `<div class="message error">Error al cargar el inventario</div>`;
+  } finally {
+    loading.style.display = "none";
   }
 }
 
-// ===================== BÚSQUEDA =====================
 async function buscarProducto() {
   const texto = document.getElementById("buscarTexto").value.trim();
-  const container = document.getElementById("resultadosBusqueda");
-  container.innerHTML = "Buscando...";
+  if (!texto) return;
+
   try {
-    const res = await fetch(`${BASE_URL}/productos/buscar?query=${texto}`);
-    const resultados = await res.json();
+    const res = await fetch(
+      `${API_URL}/productos/buscar?query=${encodeURIComponent(texto)}`
+    );
+    const productos = await res.json();
 
-    if (resultados.length === 0) {
-      container.innerHTML = "No se encontraron productos.";
-      return;
-    }
+    let html = `
+      <table>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Stock</th>
+            <th>Tipo</th>
+          </tr>
+        </thead>
+        <tbody>
+    `;
 
-    let html = `<table>
-      <thead>
+    productos.forEach((p) => {
+      html += `
         <tr>
-          <th>Código</th>
-          <th>Nombre</th>
-          <th>Grupo</th>
-          <th>Unidad</th>
-          <th>Stock</th>
+          <td>${p.codigo}</td>
+          <td>${p.nombre}</td>
+          <td>${p.stock}</td>
+          <td>${p.tipo}</td>
         </tr>
-      </thead>
-      <tbody>`;
-    resultados.forEach((p) => {
-      html += `<tr>
-        <td>${p.codigo}</td>
-        <td>${p.nombre}</td>
-        <td>${p.grupo}</td>
-        <td>${p.unidad}</td>
-        <td>${p.stock}</td>
-      </tr>`;
+      `;
     });
+
     html += "</tbody></table>";
-    container.innerHTML = html;
-  } catch (err) {
-    container.innerHTML = "Error realizando búsqueda.";
-    console.error(err);
+    document.getElementById("resultadosBusqueda").innerHTML = html;
+  } catch (error) {
+    document.getElementById(
+      "resultadosBusqueda"
+    ).innerHTML = `<div class="message error">Error en la búsqueda</div>`;
   }
 }
 
-function limpiarBusqueda() {
-  document.getElementById("buscarTexto").value = "";
-  document.getElementById("resultadosBusqueda").innerHTML = "";
-}
-
-// ===================== CONFIGURACIÓN =====================
-function validarIntegridad() {
-  document.getElementById("configResults").innerText =
-    "Validando integridad del sistema...";
-  // Aquí puedes agregar fetch a backend si existe endpoint
-}
-
-function inicializarSistema() {
-  document.getElementById("configResults").innerText =
-    "Inicializando sistema...";
-  // Aquí puedes agregar fetch a backend si existe endpoint
-}
-
-function limpiarTodosFormularios() {
-  limpiarFormProducto();
-  limpiarFormMovimiento();
-  limpiarBusqueda();
-}
-
-function confirmarReset() {
-  if (confirm("¿Estás seguro de resetear el sistema?")) {
-    document.getElementById("configResults").innerText = "Sistema reseteado.";
-  }
-}
