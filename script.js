@@ -1,6 +1,12 @@
 const API_URL = "http://localhost:4000";
 
-//Navegacion entre secciones
+// Inicialización de la aplicación
+function initializeApp() {
+  showTab("productos"); // Inicia directamente en el formulario de registro
+  console.log("Aplicación inicializada correctamente");
+}
+
+// Navegación entre secciones
 function showTab(tabId) {
   document.querySelectorAll(".tab-content").forEach((tab) => {
     tab.classList.remove("active");
@@ -18,7 +24,7 @@ function showTab(tabId) {
   if (tabId === "inventario") mostrarStock();
 }
 
-//Gestion de productos
+// Gestión de productos
 async function registrarProducto(event) {
   event.preventDefault();
 
@@ -59,7 +65,7 @@ function limpiarFormProducto() {
   showMessage("Formulario de producto limpiado.", "info");
 }
 
-//Inventario, mostrar, alertas, exportar
+// Inventario
 async function mostrarStock() {
   const cont = document.getElementById("stockTable");
   const loading = document.getElementById("loading");
@@ -78,7 +84,6 @@ async function mostrarStock() {
       <table>
         <thead>
           <tr>
-            <th>Código</th>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Precio</th>
@@ -107,6 +112,7 @@ async function mostrarStock() {
   }
 }
 
+// Mostrar solo alertas
 async function mostrarAlertas() {
   try {
     const res = await fetch(`${API_URL}/videojuegos`);
@@ -124,7 +130,6 @@ async function mostrarAlertas() {
       <table>
         <thead>
           <tr>
-            <th>Código</th>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Precio</th>
@@ -153,6 +158,7 @@ async function mostrarAlertas() {
   }
 }
 
+// Exportar inventario
 async function exportarStock() {
   try {
     const res = await fetch(`${API_URL}/videojuegos`);
@@ -163,14 +169,7 @@ async function exportarStock() {
     }
 
     const csv = [
-      [
-        "Código",
-        "Nombre",
-        "Tipo",
-        "Precio",
-        "Stock Actual",
-        "Stock Mínimo",
-      ].join(","),
+      ["Nombre", "Tipo", "Precio", "Stock Actual", "Stock Mínimo"].join(","),
       ...productos.map((p) =>
         [p.nombre, p.tipo, p.precio, p.stockActual, p.stockMinimo].join(",")
       ),
@@ -188,7 +187,7 @@ async function exportarStock() {
   }
 }
 
-//Buscar productos
+// Buscar
 async function buscarProducto() {
   const texto = document
     .getElementById("buscarTexto")
@@ -213,10 +212,10 @@ async function buscarProducto() {
 
   cont.innerHTML = `
     <table>
-      <thead><tr><th>Código</th><th>Nombre</th><th>Stock</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Stock</th></tr></thead>
       <tbody>
         ${resultados
-          .map((r) => `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
+          .map((r) => `<tr><td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
           .join("")}
       </tbody>
     </table>`;
@@ -228,7 +227,6 @@ function limpiarBusqueda() {
   document.getElementById("resultadosBusqueda").innerHTML = "";
   showMessage("Búsqueda limpiada.", "info");
 }
-
 
 //Alertas
 function showMessage(msg, type = "info") {
