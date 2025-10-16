@@ -30,7 +30,6 @@ async function registrarProducto(event) {
   event.preventDefault();
 
   const producto = {
-    codigo: document.getElementById("codigoProd").value.trim(),
     nombre: document.getElementById("nombreProd").value.trim(),
     tipo: document.getElementById("tipoProd").value.trim(),
     precio: parseFloat(document.getElementById("precioProd").value) || 0,
@@ -38,7 +37,6 @@ async function registrarProducto(event) {
   };
 
   if (
-    !producto.codigo ||
     !producto.nombre ||
     !producto.tipo ||
     producto.precio <= 0
@@ -103,7 +101,6 @@ async function mostrarStock() {
             .map(
               (p) => `
             <tr class="${p.stockActual <= p.stockMinimo ? "alert-row" : ""}">
-              <td>${p.codigo}</td>
               <td>${p.nombre}</td>
               <td>${p.tipo}</td>
               <td>$${p.precio.toFixed(2)}</td>
@@ -150,7 +147,6 @@ async function mostrarAlertas() {
             .map(
               (p) => `
             <tr class="alert-row">
-              <td>${p.codigo}</td>
               <td>${p.nombre}</td>
               <td>${p.tipo}</td>
               <td>$${p.precio.toFixed(2)}</td>
@@ -187,7 +183,6 @@ async function exportarStock() {
       ].join(","),
       ...productos.map((p) =>
         [
-          p.codigo,
           p.nombre,
           p.tipo,
           p.precio,
@@ -225,7 +220,6 @@ async function buscarProducto() {
   const productos = await res.json();
   const resultados = productos.filter(
     (p) =>
-      p.codigo.toLowerCase().includes(texto) ||
       p.nombre.toLowerCase().includes(texto)
   );
 
@@ -241,7 +235,7 @@ async function buscarProducto() {
         ${resultados
           .map(
             (r) =>
-              `<tr><td>${r.codigo}</td><td>${r.nombre}</td><td>${r.stockActual}</td></tr>`
+              `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`
           )
           .join("")}
       </tbody>
