@@ -1,5 +1,12 @@
 const API_URL = "http://localhost:4000";
 
+//Iniciacion de la aplicacion
+function initializeApp() {
+  showTab("dashboard");
+  loadDashboard();
+  console.log("Aplicación inicializada correctamente");
+}
+
 //Navegacion entre secciones
 function showTab(tabId) {
   document.querySelectorAll(".tab-content").forEach((tab) => {
@@ -227,6 +234,22 @@ function limpiarBusqueda() {
   document.getElementById("buscarTexto").value = "";
   document.getElementById("resultadosBusqueda").innerHTML = "";
   showMessage("Búsqueda limpiada.", "info");
+}
+
+function inicializarSistema() {
+  showMessage("Sistema inicializado correctamente.", "success");
+}
+
+function limpiarTodosFormularios() {
+  document.querySelectorAll("form").forEach((form) => form.reset());
+  showMessage("Todos los formularios fueron limpiados.", "info");
+}
+
+function confirmarReset() {
+  if (confirm("¿Deseas reiniciar completamente el sistema?")) {
+    localStorage.clear();
+    showMessage("Sistema reseteado completamente.", "warning");
+  }
 }
 
 //Alertas
