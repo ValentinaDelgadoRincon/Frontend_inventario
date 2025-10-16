@@ -1,12 +1,12 @@
 const API_URL = "http://localhost:4000";
 
-//Inicialización del sistema
+// Inicialización del sistema
 function initializeApp() {
   showTab("productos");
   console.log("Aplicación inicializada correctamente");
 }
 
-//Control de pestañas
+// Control de pestañas
 function showTab(tabId) {
   document
     .querySelectorAll(".tab-content")
@@ -24,7 +24,7 @@ function showTab(tabId) {
   if (tabId === "inventario") mostrarStock();
 }
 
-//Registrar Producto
+// Registrar Producto
 async function registrarProducto(event) {
   event.preventDefault();
 
@@ -56,10 +56,9 @@ async function registrarProducto(event) {
 
     const nuevoProducto = await res.json();
     showMessage("Producto registrado correctamente", "success");
-
     limpiarFormProducto();
 
-    //Agregarlo directamente al inventario si está visible
+    // Agregar directamente al inventario si está visible
     const inventarioVisible = document
       .getElementById("inventario")
       .classList.contains("active");
@@ -77,7 +76,7 @@ function limpiarFormProducto() {
   showMessage("Formulario de producto limpiado.", "info");
 }
 
-//Inventario
+// Inventario
 async function mostrarStock() {
   const cont = document.getElementById("stockTable");
   const loading = document.getElementById("loading");
@@ -100,7 +99,7 @@ async function mostrarStock() {
   }
 }
 
-//Renderizar tabla completa
+// Renderizar tabla completa
 function renderizarTabla(productos) {
   const cont = document.getElementById("stockTable");
   cont.innerHTML = `
@@ -131,7 +130,7 @@ function renderizarTabla(productos) {
     </table>`;
 }
 
-//Agregar producto directamente sin recargar todo
+// Agregar producto directamente sin recargar todo
 function agregarProductoATabla(producto) {
   const tablaBody = document.querySelector("#stockTable table tbody");
   if (!tablaBody) {
@@ -153,7 +152,8 @@ function agregarProductoATabla(producto) {
   tablaBody.appendChild(fila);
 }
 
-//Buscar producto
+// Buscar producto
+async function buscarProducto() {
   const texto = document
     .getElementById("buscarTexto")
     .value.trim()
@@ -180,17 +180,24 @@ function agregarProductoATabla(producto) {
 
     cont.innerHTML = `
       <table>
-        <thead><tr><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Stock</th>
+          </tr>
+        </thead>
         <tbody>
           ${resultados
             .map(
               (r) => `
-              <tr>
-                <td>${r.nombre}</td>
-                <td>${r.tipo}</td>
-                <td>$${r.precio.toFixed(2)}</td>
-                <td>${r.stockActual}</td>
-              </tr>`
+                <tr>
+                  <td>${r.nombre}</td>
+                  <td>${r.tipo}</td>
+                  <td>$${r.precio.toFixed(2)}</td>
+                  <td>${r.stockActual}</td>
+                </tr>`
             )
             .join("")}
         </tbody>
@@ -200,7 +207,12 @@ function agregarProductoATabla(producto) {
     console.error(error);
     showMessage("Error al buscar productos.", "error");
   }
+}
 
+// Búsqueda en tiempo real
+function buscarEnTiempoReal() {
+  buscarProducto();
+}
 
 function limpiarBusqueda() {
   document.getElementById("buscarTexto").value = "";
@@ -208,7 +220,7 @@ function limpiarBusqueda() {
   showMessage("Búsqueda limpiada.", "info");
 }
 
-//Alertas
+// Mensajes flotantes
 function showMessage(msg, type = "info") {
   const colors = {
     success: "#4CAF50",
