@@ -85,12 +85,10 @@ async function mostrarStock() {
       <table>
         <thead>
           <tr>
-            <th>Código</th>
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Precio</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
+            <th>Stock</th>
           </tr>
         </thead>
         <tbody>
@@ -102,7 +100,6 @@ async function mostrarStock() {
               <td>${p.tipo}</td>
               <td>$${p.precio.toFixed(2)}</td>
               <td>${p.stockActual}</td>
-              <td>${p.stockMinimo}</td>
             </tr>`
             )
             .join("")}
