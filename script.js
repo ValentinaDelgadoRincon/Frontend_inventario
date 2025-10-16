@@ -23,7 +23,6 @@ function showTab(tabId) {
   if (activeLink) activeLink.classList.add("active");
 
   if (tabId === "inventario") mostrarStock();
-  if (tabId === "reportes") mostrarHistorial?.();
 }
 
 //Gestion de productos
@@ -33,11 +32,21 @@ async function registrarProducto(event) {
   const producto = {
     codigo: document.getElementById("codigoProd").value.trim(),
     nombre: document.getElementById("nombreProd").value.trim(),
+    tipo: document.getElementById("tipoProd").value.trim(),
+    precio: parseFloat(document.getElementById("precioProd").value) || 0,
     stockMinimo: Number(document.getElementById("stockMinProd").value) || 0,
   };
 
-  if (!producto.codigo || !producto.nombre) {
-    showMessage("Completa los campos obligatorios.", "warning");
+  if (
+    !producto.codigo ||
+    !producto.nombre ||
+    !producto.tipo ||
+    producto.precio <= 0
+  ) {
+    showMessage(
+      "Completa todos los campos obligatorios y asegúrate de que el precio sea mayor a 0.",
+      "warning"
+    );
     return;
   }
 
@@ -62,8 +71,7 @@ function limpiarFormProducto() {
   showMessage("Formulario de producto limpiado.", "info");
 }
 
-
-//Inventario, mostrar,alertas,exportar
+//Inventario, mostrar, alertas, exportar
 async function mostrarStock() {
   const cont = document.getElementById("stockTable");
   const loading = document.getElementById("loading");
@@ -80,7 +88,16 @@ async function mostrarStock() {
 
     cont.innerHTML = `
       <table>
-        <thead><tr><th>Código</th><th>Nombre</th><th>Stock Actual</th><th>Stock Mínimo</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Stock Actual</th>
+            <th>Stock Mínimo</th>
+          </tr>
+        </thead>
         <tbody>
           ${productos
             .map(
@@ -88,6 +105,8 @@ async function mostrarStock() {
             <tr class="${p.stockActual <= p.stockMinimo ? "alert-row" : ""}">
               <td>${p.codigo}</td>
               <td>${p.nombre}</td>
+              <td>${p.tipo}</td>
+              <td>$${p.precio.toFixed(2)}</td>
               <td>${p.stockActual}</td>
               <td>${p.stockMinimo}</td>
             </tr>`
@@ -116,7 +135,16 @@ async function mostrarAlertas() {
 
     cont.innerHTML = `
       <table>
-        <thead><tr><th>Código</th><th>Nombre</th><th>Stock Actual</th><th>Stock Mínimo</th></tr></thead>
+        <thead>
+          <tr>
+            <th>Código</th>
+            <th>Nombre</th>
+            <th>Tipo</th>
+            <th>Precio</th>
+            <th>Stock Actual</th>
+            <th>Stock Mínimo</th>
+          </tr>
+        </thead>
         <tbody>
           ${alertas
             .map(
@@ -124,6 +152,8 @@ async function mostrarAlertas() {
             <tr class="alert-row">
               <td>${p.codigo}</td>
               <td>${p.nombre}</td>
+              <td>${p.tipo}</td>
+              <td>$${p.precio.toFixed(2)}</td>
               <td>${p.stockActual}</td>
               <td>${p.stockMinimo}</td>
             </tr>`
@@ -147,9 +177,23 @@ async function exportarStock() {
     }
 
     const csv = [
-      ["Código", "Nombre", "Stock Actual", "Stock Mínimo"].join(","),
+      [
+        "Código",
+        "Nombre",
+        "Tipo",
+        "Precio",
+        "Stock Actual",
+        "Stock Mínimo",
+      ].join(","),
       ...productos.map((p) =>
-        [p.codigo, p.nombre, p.stockActual, p.stockMinimo].join(",")
+        [
+          p.codigo,
+          p.nombre,
+          p.tipo,
+          p.precio,
+          p.stockActual,
+          p.stockMinimo,
+        ].join(",")
       ),
     ].join("\n");
 
@@ -161,77 +205,6 @@ async function exportarStock() {
     showMessage("Inventario exportado correctamente.", "success");
   } catch (error) {
     showMessage("Error al exportar inventario.", "error");
-    console.error(error);
-  }
-}
-
-//Reportes
-async function mostrarHistorial() {
-  const cont = document.getElementById("historialTable");
-  try {
-    const res = await fetch(`${API_URL}/movimientos`);
-    const movs = await res.json();
-    if (!movs.length) {
-      cont.innerHTML = "<p>No hay movimientos registrados.</p>";
-      return;
-    }
-
-    cont.innerHTML = `
-      <table>
-        <thead><tr><th>Código</th><th>Fecha</th><th>Tipo</th><th>Cantidad</th><th>Obs</th></tr></thead>
-        <tbody>
-          ${movs
-            .map(
-              (m) => `
-            <tr>
-              <td>${m.codigoProducto}</td>
-              <td>${m.fecha}</td>
-              <td>${m.tipo}</td>
-              <td>${m.cantidad}</td>
-              <td>${m.observaciones || ""}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>`;
-  } catch (error) {
-    console.error(error);
-    showMessage("Error al generar reporte.", "error");
-  }
-}
-
-async function exportarReporte() {
-  try {
-    const res = await fetch(`${API_URL}/movimientos`);
-    const movs = await res.json();
-    if (!movs.length) {
-      showMessage("No hay movimientos para exportar.", "warning");
-      return;
-    }
-
-    const csv = [
-      ["Código Producto", "Fecha", "Tipo", "Cantidad", "Observaciones"].join(
-        ","
-      ),
-      ...movs.map((m) =>
-        [
-          m.codigoProducto,
-          m.fecha,
-          m.tipo,
-          m.cantidad,
-          m.observaciones || "",
-        ].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "reporte_movimientos.csv";
-    link.click();
-    showMessage("Reporte exportado correctamente.", "success");
-  } catch (error) {
-    showMessage("Error al exportar reporte.", "error");
     console.error(error);
   }
 }
@@ -281,7 +254,6 @@ function limpiarBusqueda() {
   document.getElementById("resultadosBusqueda").innerHTML = "";
   showMessage("Búsqueda limpiada.", "info");
 }
-
 
 function inicializarSistema() {
   showMessage("Sistema inicializado correctamente.", "success");
