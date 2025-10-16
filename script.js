@@ -34,7 +34,7 @@ async function registrarProducto(event) {
     proveedor: document.getElementById("provProd").value.trim(),
     tipo: document.getElementById("tipoProd").value.trim(),
     precio: parseFloat(document.getElementById("precioProd").value) || 0,
-    stock: Number(document.getElementById("stockMinProd").value) || 0,
+    stock: Number(document.getElementById("stockProd").value) || 0,
   };
 
   if (!producto.nombre || !producto.tipo || producto.precio <= 0) {
@@ -99,7 +99,7 @@ async function mostrarStock() {
               <td>${p.nombre}</td>
               <td>${p.tipo}</td>
               <td>$${p.precio.toFixed(2)}</td>
-              <td>${p.stockActual}</td>
+              <td>${p.stock}</td>
             </tr>`
             )
             .join("")}
@@ -132,8 +132,7 @@ async function mostrarAlertas() {
             <th>Nombre</th>
             <th>Tipo</th>
             <th>Precio</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
+            <th>Stock</th>
           </tr>
         </thead>
         <tbody>
@@ -144,8 +143,7 @@ async function mostrarAlertas() {
               <td>${p.nombre}</td>
               <td>${p.tipo}</td>
               <td>$${p.precio.toFixed(2)}</td>
-              <td>${p.stockActual}</td>
-              <td>${p.stockMinimo}</td>
+              <td>${p.stock}</td>
             </tr>`
             )
             .join("")}
@@ -168,15 +166,13 @@ async function exportarStock() {
 
     const csv = [
       [
-        "Código",
         "Nombre",
         "Tipo",
         "Precio",
-        "Stock Actual",
-        "Stock Mínimo",
+        "Stock",
       ].join(","),
       ...productos.map((p) =>
-        [p.nombre, p.tipo, p.precio, p.stockActual, p.stockMinimo].join(",")
+        [p.nombre, p.tipo, p.precio, p.stock].join(",")
       ),
     ].join("\n");
 
@@ -220,7 +216,7 @@ async function buscarProducto() {
       <thead><tr><th>Nombre</th><th>Stock</th></tr></thead>
       <tbody>
         ${resultados
-          .map((r) => `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
+          .map((r) => `<td>${r.nombre}</td><td>${r.stock}</td></tr>`)
           .join("")}
       </tbody>
     </table>`;
