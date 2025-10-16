@@ -49,7 +49,7 @@ async function registrarProducto(event) {
   }
 
   try {
-    const res = await fetch(`${API_URL}/productos`, {
+    const res = await fetch(`${API_URL}/videojuegos`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify(producto),
@@ -75,7 +75,7 @@ async function mostrarStock() {
   const loading = document.getElementById("loading");
   loading.style.display = "block";
   try {
-    const res = await fetch(`${API_URL}/productos`);
+    const res = await fetch(`${API_URL}/videojuegos`);
     const productos = await res.json();
     loading.style.display = "none";
 
@@ -119,7 +119,7 @@ async function mostrarStock() {
 
 async function mostrarAlertas() {
   try {
-    const res = await fetch(`${API_URL}/productos`);
+    const res = await fetch(`${API_URL}/videojuegos`);
     const productos = await res.json();
     const alertas = productos.filter((p) => p.stockActual <= p.stockMinimo);
     const cont = document.getElementById("stockTable");
@@ -165,7 +165,7 @@ async function mostrarAlertas() {
 
 async function exportarStock() {
   try {
-    const res = await fetch(`${API_URL}/productos`);
+    const res = await fetch(`${API_URL}/videojuegos`);
     const productos = await res.json();
     if (!productos.length) {
       showMessage("No hay productos para exportar.", "warning");
@@ -216,7 +216,7 @@ async function buscarProducto() {
     return;
   }
 
-  const res = await fetch(`${API_URL}/productos`);
+  const res = await fetch(`${API_URL}/videojuegos`);
   const productos = await res.json();
   const resultados = productos.filter(
     (p) =>
