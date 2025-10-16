@@ -14,7 +14,7 @@
       </div>
       <ul class="nav-menu">
         <li class="nav-item">
-          <a class="nav-link active" onclick="showTab('productos')">
+          <a class="nav-link" onclick="showTab('productos')">
             <span class="nav-icon">📦</span> Nuevo producto
           </a>
         </li>
@@ -34,7 +34,7 @@
     <div class="main-content">
 
       <!-- PRODUCTOS -->
-      <div id="productos" class="tab-content active">
+      <div id="productos" class="tab-content">
         <div class="content-header">
           <h2>Gestión de Productos</h2>
         </div>
@@ -44,6 +44,7 @@
             <div class="card-body">
               <form id="formProducto" onsubmit="registrarProducto(event)">
                 <div class="form-grid">
+
                   <div class="form-group">
                     <label for="nombreProd">Nombre *</label>
                     <input id="nombreProd" type="text" placeholder="Nombre del producto" required />
@@ -126,7 +127,7 @@
             <div class="card-body">
               <div class="form-grid">
                 <div class="form-group">
-                  <label for="buscarTexto">Buscar por nombre</label>
+                  <label for="buscarTexto">Buscar por código o nombre</label>
                   <input id="buscarTexto" type="text" placeholder="Escriba para buscar..."
                     onkeyup="buscarEnTiempoReal()" />
                 </div>
@@ -146,7 +147,6 @@
           </div>
         </div>
       </div>
-
     </div>
   </div>
 
