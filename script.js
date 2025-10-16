@@ -2,7 +2,7 @@ const API_URL = "http://localhost:4000";
 
 //Iniciacion de la aplicacion
 function initializeApp() {
-  showTab("dashboard");
+  showTab("productos");
   loadDashboard();
   console.log("Aplicación inicializada correctamente");
 }
