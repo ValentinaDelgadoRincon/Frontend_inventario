@@ -1,4 +1,4 @@
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:4000";
 
 //Iniciacion de la aplicacion
 function initializeApp() {
@@ -31,16 +31,13 @@ async function registrarProducto(event) {
 
   const producto = {
     nombre: document.getElementById("nombreProd").value.trim(),
+    proveedor: document.getElementById("provProd").value.trim(),
     tipo: document.getElementById("tipoProd").value.trim(),
     precio: parseFloat(document.getElementById("precioProd").value) || 0,
     stock: Number(document.getElementById("stockMinProd").value) || 0,
   };
 
-  if (
-    !producto.nombre ||
-    !producto.tipo ||
-    producto.precio <= 0
-  ) {
+  if (!producto.nombre || !producto.tipo || producto.precio <= 0) {
     showMessage(
       "Completa todos los campos obligatorios y asegúrate de que el precio sea mayor a 0.",
       "warning"
@@ -182,13 +179,7 @@ async function exportarStock() {
         "Stock Mínimo",
       ].join(","),
       ...productos.map((p) =>
-        [
-          p.nombre,
-          p.tipo,
-          p.precio,
-          p.stockActual,
-          p.stockMinimo,
-        ].join(",")
+        [p.nombre, p.tipo, p.precio, p.stockActual, p.stockMinimo].join(",")
       ),
     ].join("\n");
 
@@ -218,9 +209,8 @@ async function buscarProducto() {
 
   const res = await fetch(`${API_URL}/videojuegos`);
   const productos = await res.json();
-  const resultados = productos.filter(
-    (p) =>
-      p.nombre.toLowerCase().includes(texto)
+  const resultados = productos.filter((p) =>
+    p.nombre.toLowerCase().includes(texto)
   );
 
   if (!resultados.length) {
@@ -233,10 +223,7 @@ async function buscarProducto() {
       <thead><tr><th>Código</th><th>Nombre</th><th>Stock</th></tr></thead>
       <tbody>
         ${resultados
-          .map(
-            (r) =>
-              `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`
-          )
+          .map((r) => `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
           .join("")}
       </tbody>
     </table>`;
