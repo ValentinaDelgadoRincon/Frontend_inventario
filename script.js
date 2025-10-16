@@ -33,7 +33,7 @@ async function registrarProducto(event) {
     nombre: document.getElementById("nombreProd").value.trim(),
     tipo: document.getElementById("tipoProd").value.trim(),
     precio: parseFloat(document.getElementById("precioProd").value) || 0,
-    stockMinimo: Number(document.getElementById("stockMinProd").value) || 0,
+    stock: Number(document.getElementById("stockMinProd").value) || 0,
   };
 
   if (
