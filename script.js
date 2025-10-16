@@ -11,7 +11,7 @@ function showMessage(message, type = "info") {
   const box = document.getElementById("msgProd");
   if (!box) return;
   box.textContent = message;
-  box.className = `msg ${type}`;
+  box.className = `message ${type}`;
   box.style.display = "block";
   setTimeout(() => (box.style.display = "none"), 3000);
 }
@@ -55,13 +55,12 @@ async function registrarProducto(event) {
     });
 
     if (!res.ok) throw new Error("Error al registrar producto");
-
-    showMessage("✅ Producto registrado con éxito.", "success");
+    showMessage("Producto registrado con éxito.", "success");
     limpiarFormProducto();
     mostrarStock(); // Actualiza sin recargar
   } catch (error) {
     console.error(error);
-    showMessage("❌ Error al registrar el producto.", "error");
+    showMessage("Error al registrar el producto.", "error");
   }
 }
 
@@ -102,11 +101,13 @@ async function mostrarStock() {
                 <td>${p.proveedor}</td>
                 <td>$${p.precio.toFixed(2)}</td>
                 <td>${p.stock}</td>
-              </tr>`
+              </tr>
+            `
             )
             .join("")}
         </tbody>
-      </table>`;
+      </table>
+    `;
   } catch (error) {
     console.error(error);
     showMessage("Error al mostrar inventario.", "error");
@@ -125,7 +126,6 @@ async function mostrarAlertas() {
     loading.style.display = "none";
 
     const alertas = productos.filter((p) => p.stock <= 5);
-
     if (!alertas.length) {
       cont.innerHTML = "<p>No hay alertas de stock bajo.</p>";
       return;
@@ -144,11 +144,13 @@ async function mostrarAlertas() {
                 <td>${p.nombre}</td>
                 <td>${p.proveedor}</td>
                 <td>${p.stock}</td>
-              </tr>`
+              </tr>
+            `
             )
             .join("")}
         </tbody>
-      </table>`;
+      </table>
+    `;
   } catch (error) {
     console.error(error);
     showMessage("Error al cargar alertas.", "error");
@@ -196,11 +198,14 @@ async function buscarProducto() {
                 <td>${r.proveedor}</td>
                 <td>$${r.precio.toFixed(2)}</td>
                 <td>${r.stock}</td>
-              </tr>`
+              </tr>
+            `
             )
             .join("")}
         </tbody>
-      </table>`;
+      </table>
+    `;
+
     showMessage(`${resultados.length} producto(s) encontrados.`, "success");
   } catch (error) {
     console.error(error);
