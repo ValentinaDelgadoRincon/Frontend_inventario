@@ -1,21 +1,21 @@
 const API_URL = "http://localhost:4000";
 
-// Inicialización de la aplicación
+//Inicialización del sistema
 function initializeApp() {
-  showTab("productos"); // Inicia directamente en el formulario de registro
+  showTab("productos");
   console.log("Aplicación inicializada correctamente");
 }
 
-// Navegación entre secciones
+//Control de pestañas
 function showTab(tabId) {
-  document.querySelectorAll(".tab-content").forEach((tab) => {
-    tab.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".tab-content")
+    .forEach((tab) => tab.classList.remove("active"));
   document.getElementById(tabId).classList.add("active");
 
-  document.querySelectorAll(".nav-link").forEach((link) => {
-    link.classList.remove("active");
-  });
+  document
+    .querySelectorAll(".nav-link")
+    .forEach((link) => link.classList.remove("active"));
   const activeLink = [...document.querySelectorAll(".nav-link")].find((link) =>
     link.getAttribute("onclick")?.includes(tabId)
   );
@@ -24,7 +24,7 @@ function showTab(tabId) {
   if (tabId === "inventario") mostrarStock();
 }
 
-// Gestión de productos
+//Registrar Producto
 async function registrarProducto(event) {
   event.preventDefault();
 
@@ -33,7 +33,8 @@ async function registrarProducto(event) {
     proveedor: document.getElementById("provProd").value.trim(),
     tipo: document.getElementById("tipoProd").value.trim(),
     precio: parseFloat(document.getElementById("precioProd").value) || 0,
-    stock: Number(document.getElementById("stockMinProd").value) || 0,
+    stockActual: Number(document.getElementById("stockMinProd").value) || 0,
+    stockMinimo: Number(document.getElementById("stockMinProd").value) || 0,
   };
 
   if (!producto.nombre || !producto.tipo || producto.precio <= 0) {
@@ -52,8 +53,19 @@ async function registrarProducto(event) {
     });
 
     if (!res.ok) throw new Error("Error al registrar producto");
+
+    const nuevoProducto = await res.json();
     showMessage("Producto registrado correctamente", "success");
+
     limpiarFormProducto();
+
+    //Agregarlo directamente al inventario si está visible
+    const inventarioVisible = document
+      .getElementById("inventario")
+      .classList.contains("active");
+    if (inventarioVisible) {
+      agregarProductoATabla(nuevoProducto);
+    }
   } catch (error) {
     console.error(error);
     showMessage("Error al registrar producto.", "error");
@@ -65,11 +77,12 @@ function limpiarFormProducto() {
   showMessage("Formulario de producto limpiado.", "info");
 }
 
-// Inventario
+//Inventario
 async function mostrarStock() {
   const cont = document.getElementById("stockTable");
   const loading = document.getElementById("loading");
   loading.style.display = "block";
+
   try {
     const res = await fetch(`${API_URL}/videojuegos`);
     const productos = await res.json();
@@ -80,146 +93,113 @@ async function mostrarStock() {
       return;
     }
 
-    cont.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Precio</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${productos
-            .map(
-              (p) => `
-            <tr class="${p.stockActual <= p.stockMinimo ? "alert-row" : ""}">
-              <td>${p.nombre}</td>
-              <td>${p.tipo}</td>
-              <td>$${p.precio.toFixed(2)}</td>
-              <td>${p.stockActual}</td>
-              <td>${p.stockMinimo}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>`;
+    renderizarTabla(productos);
   } catch (error) {
     console.error(error);
     showMessage("Error al mostrar el inventario.", "error");
   }
 }
 
-// Mostrar solo alertas
-async function mostrarAlertas() {
-  try {
-    const res = await fetch(`${API_URL}/videojuegos`);
-    const productos = await res.json();
-    const alertas = productos.filter((p) => p.stockActual <= p.stockMinimo);
-    const cont = document.getElementById("stockTable");
-
-    if (!alertas.length) {
-      cont.innerHTML = "<p>No hay alertas de stock.</p>";
-      showMessage("No hay productos en alerta.", "info");
-      return;
-    }
-
-    cont.innerHTML = `
-      <table>
-        <thead>
-          <tr>
-            <th>Nombre</th>
-            <th>Tipo</th>
-            <th>Precio</th>
-            <th>Stock Actual</th>
-            <th>Stock Mínimo</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${alertas
-            .map(
-              (p) => `
-            <tr class="alert-row">
-              <td>${p.nombre}</td>
-              <td>${p.tipo}</td>
-              <td>$${p.precio.toFixed(2)}</td>
-              <td>${p.stockActual}</td>
-              <td>${p.stockMinimo}</td>
-            </tr>`
-            )
-            .join("")}
-        </tbody>
-      </table>`;
-  } catch (error) {
-    console.error(error);
-    showMessage("Error al mostrar alertas.", "error");
-  }
+//Renderizar tabla completa
+function renderizarTabla(productos) {
+  const cont = document.getElementById("stockTable");
+  cont.innerHTML = `
+    <table>
+      <thead>
+        <tr>
+          <th>Nombre</th>
+          <th>Tipo</th>
+          <th>Precio</th>
+          <th>Stock Actual</th>
+          <th>Stock Mínimo</th>
+        </tr>
+      </thead>
+      <tbody>
+        ${productos
+          .map(
+            (p) => `
+          <tr class="${p.stockActual <= p.stockMinimo ? "alert-row" : ""}">
+            <td>${p.nombre}</td>
+            <td>${p.tipo}</td>
+            <td>$${p.precio.toFixed(2)}</td>
+            <td>${p.stockActual}</td>
+            <td>${p.stockMinimo}</td>
+          </tr>`
+          )
+          .join("")}
+      </tbody>
+    </table>`;
 }
 
-// Exportar inventario
-async function exportarStock() {
-  try {
-    const res = await fetch(`${API_URL}/videojuegos`);
-    const productos = await res.json();
-    if (!productos.length) {
-      showMessage("No hay productos para exportar.", "warning");
-      return;
-    }
-
-    const csv = [
-      ["Nombre", "Tipo", "Precio", "Stock Actual", "Stock Mínimo"].join(","),
-      ...productos.map((p) =>
-        [p.nombre, p.tipo, p.precio, p.stockActual, p.stockMinimo].join(",")
-      ),
-    ].join("\n");
-
-    const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
-    const link = document.createElement("a");
-    link.href = URL.createObjectURL(blob);
-    link.download = "inventario.csv";
-    link.click();
-    showMessage("Inventario exportado correctamente.", "success");
-  } catch (error) {
-    showMessage("Error al exportar inventario.", "error");
-    console.error(error);
+//Agregar producto directamente sin recargar todo
+function agregarProductoATabla(producto) {
+  const tablaBody = document.querySelector("#stockTable table tbody");
+  if (!tablaBody) {
+    mostrarStock();
+    return;
   }
+
+  const fila = document.createElement("tr");
+  fila.classList.add(
+    producto.stockActual <= producto.stockMinimo ? "alert-row" : ""
+  );
+  fila.innerHTML = `
+    <td>${producto.nombre}</td>
+    <td>${producto.tipo}</td>
+    <td>$${producto.precio.toFixed(2)}</td>
+    <td>${producto.stockActual}</td>
+    <td>${producto.stockMinimo}</td>
+  `;
+  tablaBody.appendChild(fila);
 }
 
-// Buscar
-async function buscarProducto() {
+//Buscar producto
   const texto = document
     .getElementById("buscarTexto")
     .value.trim()
     .toLowerCase();
   const cont = document.getElementById("resultadosBusqueda");
+
   if (!texto) {
     showMessage("Escribe algo para buscar.", "info");
     return;
   }
 
-  const res = await fetch(`${API_URL}/videojuegos`);
-  const productos = await res.json();
-  const resultados = productos.filter((p) =>
-    p.nombre.toLowerCase().includes(texto)
-  );
+  try {
+    const res = await fetch(`${API_URL}/videojuegos`);
+    const productos = await res.json();
 
-  if (!resultados.length) {
-    cont.innerHTML = "<p>No se encontraron resultados.</p>";
-    return;
+    const resultados = productos.filter((p) =>
+      p.nombre.toLowerCase().includes(texto)
+    );
+
+    if (!resultados.length) {
+      cont.innerHTML = "<p>No se encontraron resultados.</p>";
+      return;
+    }
+
+    cont.innerHTML = `
+      <table>
+        <thead><tr><th>Nombre</th><th>Tipo</th><th>Precio</th><th>Stock</th></tr></thead>
+        <tbody>
+          ${resultados
+            .map(
+              (r) => `
+              <tr>
+                <td>${r.nombre}</td>
+                <td>${r.tipo}</td>
+                <td>$${r.precio.toFixed(2)}</td>
+                <td>${r.stockActual}</td>
+              </tr>`
+            )
+            .join("")}
+        </tbody>
+      </table>`;
+    showMessage(`${resultados.length} producto(s) encontrados.`, "success");
+  } catch (error) {
+    console.error(error);
+    showMessage("Error al buscar productos.", "error");
   }
-
-  cont.innerHTML = `
-    <table>
-      <thead><tr><th>Nombre</th><th>Stock</th></tr></thead>
-      <tbody>
-        ${resultados
-          .map((r) => `<tr><td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
-          .join("")}
-      </tbody>
-    </table>`;
-  showMessage(`${resultados.length} producto(s) encontrados.`, "success");
 }
 
 function limpiarBusqueda() {
