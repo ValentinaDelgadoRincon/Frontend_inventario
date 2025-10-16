@@ -217,7 +217,7 @@ async function buscarProducto() {
 
   cont.innerHTML = `
     <table>
-      <thead><tr><th>Código</th><th>Nombre</th><th>Stock</th></tr></thead>
+      <thead><tr><th>Nombre</th><th>Stock</th></tr></thead>
       <tbody>
         ${resultados
           .map((r) => `<td>${r.nombre}</td><td>${r.stockActual}</td></tr>`)
