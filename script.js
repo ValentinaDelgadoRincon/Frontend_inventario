@@ -1,24 +1,22 @@
 const API_URL = "http://localhost:4000";
 
-// Inicialización de la aplicación
+// Inicialización
 function initializeApp() {
-  showTab("productos"); // Inicia directamente en el formulario de registro
+  showTab("productos");
   console.log("Aplicación inicializada correctamente");
 }
 
-// Mostrar mensajes al usuario
+// Mostrar mensajes (simple)
 function showMessage(message, type = "info") {
-  const msgBox = document.getElementById("mensaje");
-  msgBox.textContent = message;
-  msgBox.className = `mensaje ${type}`;
-  msgBox.style.display = "block";
-
-  setTimeout(() => {
-    msgBox.style.display = "none";
-  }, 3000);
+  const box = document.getElementById("msgProd");
+  if (!box) return;
+  box.textContent = message;
+  box.className = `msg ${type}`;
+  box.style.display = "block";
+  setTimeout(() => (box.style.display = "none"), 3000);
 }
 
-// Cambiar de pestaña
+// Cambiar pestañas
 function showTab(tabId) {
   document.querySelectorAll(".tab-content").forEach((tab) => {
     tab.style.display = "none";
@@ -26,19 +24,24 @@ function showTab(tabId) {
   document.getElementById(tabId).style.display = "block";
 }
 
+// Limpiar formulario
+function limpiarFormProducto() {
+  document.getElementById("formProducto").reset();
+  showMessage("Formulario limpio.", "info");
+}
+
 // Registrar producto
 async function registrarProducto(event) {
   event.preventDefault();
 
   const producto = {
-    nombre: document.getElementById("nombre").value.trim(),
-    tipo: document.getElementById("tipo").value.trim(),
-    proveedor: document.getElementById("proveedor").value.trim(),
-    precio: parseFloat(document.getElementById("precio").value) || 0,
-    stock: parseInt(document.getElementById("stock").value) || 0,
+    nombre: document.getElementById("nombreProd").value.trim(),
+    tipo: document.getElementById("tipoProd").value.trim(),
+    proveedor: document.getElementById("provProd").value.trim(),
+    precio: parseFloat(document.getElementById("precioProd").value) || 0,
+    stock: parseInt(document.getElementById("stockMinProd").value) || 0,
   };
 
-  // Validaciones básicas
   if (!producto.nombre || !producto.tipo || !producto.proveedor) {
     showMessage("Completa todos los campos obligatorios.", "error");
     return;
@@ -53,16 +56,12 @@ async function registrarProducto(event) {
 
     if (!res.ok) throw new Error("Error al registrar producto");
 
-    showMessage("Producto registrado con éxito.", "success");
-
-    // Limpia el formulario
-    document.getElementById("formProducto").reset();
-
-    // Actualiza el inventario automáticamente
-    mostrarStock();
+    showMessage("✅ Producto registrado con éxito.", "success");
+    limpiarFormProducto();
+    mostrarStock(); // Actualiza sin recargar
   } catch (error) {
     console.error(error);
-    showMessage("Error al registrar el producto.", "error");
+    showMessage("❌ Error al registrar el producto.", "error");
   }
 }
 
@@ -110,14 +109,14 @@ async function mostrarStock() {
       </table>`;
   } catch (error) {
     console.error(error);
-    showMessage("Error al mostrar el inventario.", "error");
+    showMessage("Error al mostrar inventario.", "error");
   }
 }
 
-// Mostrar alertas de stock bajo (opcional)
+// Mostrar alertas de stock bajo
 async function mostrarAlertas() {
-  const cont = document.getElementById("alertasTable");
-  const loading = document.getElementById("loadingAlertas");
+  const cont = document.getElementById("stockTable");
+  const loading = document.getElementById("loading");
   loading.style.display = "block";
 
   try {
@@ -125,7 +124,6 @@ async function mostrarAlertas() {
     const productos = await res.json();
     loading.style.display = "none";
 
-    // Mostrar productos con poco stock (ejemplo: stock <= 5)
     const alertas = productos.filter((p) => p.stock <= 5);
 
     if (!alertas.length) {
@@ -136,9 +134,7 @@ async function mostrarAlertas() {
     cont.innerHTML = `
       <table>
         <thead>
-          <tr>
-            <th>Nombre</th><th>Proveedor</th><th>Stock</th>
-          </tr>
+          <tr><th>Nombre</th><th>Proveedor</th><th>Stock</th></tr>
         </thead>
         <tbody>
           ${alertas
@@ -168,7 +164,7 @@ async function buscarProducto() {
   const cont = document.getElementById("resultadosBusqueda");
 
   if (!texto) {
-    showMessage("Escribe algo para buscar.", "info");
+    cont.innerHTML = "<p>Escribe algo para buscar.</p>";
     return;
   }
 
@@ -210,4 +206,16 @@ async function buscarProducto() {
     console.error(error);
     showMessage("Error al buscar productos.", "error");
   }
+}
+
+// Buscar en tiempo real
+function buscarEnTiempoReal() {
+  buscarProducto();
+}
+
+// Limpiar búsqueda
+function limpiarBusqueda() {
+  document.getElementById("buscarTexto").value = "";
+  document.getElementById("resultadosBusqueda").innerHTML = "";
+  showMessage("Búsqueda limpia.", "info");
 }
