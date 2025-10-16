@@ -200,7 +200,7 @@ function agregarProductoATabla(producto) {
     console.error(error);
     showMessage("Error al buscar productos.", "error");
   }
-}
+
 
 function limpiarBusqueda() {
   document.getElementById("buscarTexto").value = "";
