@@ -62,43 +62,6 @@ function limpiarFormProducto() {
   showMessage("Formulario de producto limpiado.", "info");
 }
 
-//Movimiento de inventario
-async function registrarMovimiento(event) {
-  event.preventDefault();
-
-  const movimiento = {
-    codigoProducto: document.getElementById("codigoMov").value.trim(),
-    fecha: document.getElementById("fechaMov").value,
-    tipo: document.getElementById("tipoMov").value,
-    cantidad: Number(document.getElementById("cantMov").value),
-    observaciones: document.getElementById("obsMov").value.trim(),
-  };
-
-  if (!movimiento.codigoProducto || !movimiento.fecha || !movimiento.tipo) {
-    showMessage("Completa los campos obligatorios del movimiento.", "warning");
-    return;
-  }
-
-  try {
-    const res = await fetch(`${API_URL}/movimientos`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(movimiento),
-    });
-
-    if (!res.ok) throw new Error("Error al guardar movimiento");
-    showMessage("Movimiento guardado correctamente", "success");
-    limpiarFormMovimiento();
-  } catch (error) {
-    console.error(error);
-    showMessage("Error al guardar movimiento.", "error");
-  }
-}
-
-function limpiarFormMovimiento() {
-  document.getElementById("formMovimiento").reset();
-  showMessage("Formulario de movimiento limpiado.", "info");
-}
 
 //Inventario, mostrar,alertas,exportar
 async function mostrarStock() {
