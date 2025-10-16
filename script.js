@@ -1,4 +1,4 @@
-const API_URL = "https://tienda-de-videojuegos.onrender.com";
+const API_URL = "http://localhost:4000";
 
 //Iniciacion de la aplicacion
 function initializeApp() {
