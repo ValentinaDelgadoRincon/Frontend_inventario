@@ -246,8 +246,11 @@ async function simularCompra(event) {
   }
 
   try {
+    // Obtener lista de productos
     const res = await fetch(`${API_URL}/videojuegos`);
     const productos = await res.json();
+
+    // Buscar el producto por nombre
     const producto = productos.find(
       (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
     );
@@ -257,9 +260,22 @@ async function simularCompra(event) {
       return;
     }
 
-    // Calcular nuevo stock, costo total y fecha/hora actual
+    // Calcular nuevo stock
     const nuevoStock = producto.stock + cantidad;
     const costoTotal = producto.precio * cantidad;
+
+    // Actualizar producto en el backend
+    const updateRes = await fetch(`${API_URL}/videojuegos/${producto._id}`, {
+      method: "PUT",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ stock: nuevoStock }),
+    });
+
+    if (!updateRes.ok) {
+      throw new Error("Error al actualizar el producto en la base de datos.");
+    }
+
+    // Obtener fecha y hora actual
     const fecha = new Date();
     const fechaFormateada = fecha.toLocaleDateString("es-CO", {
       year: "numeric",
@@ -274,27 +290,27 @@ async function simularCompra(event) {
 
     // Mostrar mensaje principal
     showMessage(
-      `Compra realizada con éxito. Nuevo stock de "${producto.nombre}": ${nuevoStock} unidades.`,
+      `Compra registrada con éxito. Nuevo stock de "${producto.nombre}": ${nuevoStock} unidades.`,
       "success"
     );
 
     // Mostrar resumen visual
     document.getElementById("msgCompra").innerHTML = `
       <div class="message success">
-        <h3>Compra realizada con éxito</h3>
+        <h3>Compra registrada en el inventario</h3>
         <p><strong>Producto:</strong> ${producto.nombre}</p>
         <p><strong>Cantidad comprada:</strong> ${cantidad}</p>
         <p><strong>Precio unitario:</strong> $${producto.precio.toLocaleString()}</p>
         <p><strong>Costo total:</strong> $${costoTotal.toLocaleString()}</p>
-        <p><strong>Stock nuevo (simulado):</strong> ${nuevoStock}</p>
+        <p><strong>Stock nuevo (base de datos):</strong> ${nuevoStock}</p>
         <hr>
         <p><strong>Fecha:</strong> ${fechaFormateada}</p>
         <p><strong>Hora:</strong> ${horaFormateada}</p>
       </div>
     `;
 
-    // Guardar la compra simulada en el historial
-    const compraSimulada = {
+    // Guardar compra en historial (opcional)
+    const compra = {
       nombre: producto.nombre,
       cantidad,
       precioUnitario: producto.precio,
@@ -302,12 +318,13 @@ async function simularCompra(event) {
       fecha: fechaFormateada,
       hora: horaFormateada,
     };
-    guardarCompraEnHistorial(compraSimulada);
+    guardarCompraEnHistorial(compra);
   } catch (error) {
     console.error(error);
-    showMessage("Error al realizar la compra.", "error");
+    showMessage("Error al registrar la compra.", "error");
   }
 }
+
 
 
 
