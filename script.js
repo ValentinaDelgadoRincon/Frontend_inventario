@@ -272,23 +272,13 @@ async function simularCompra(event) {
       second: "2-digit",
     });
 
-    // Guardar la compra simulada en el historial
-    const compraSimulada = {
-      nombre: producto.nombre,
-      cantidad,
-      precioUnitario: producto.precio,
-      costoTotal,
-      fecha: fechaFormateada,
-      hora: horaFormateada,
-    };
-    guardarCompraEnHistorial(compraSimulada);
-
-    // Mostrar mensaje y resumen
+    // Mostrar mensaje principal
     showMessage(
       `Compra realizada con éxito. Nuevo stock de "${producto.nombre}": ${nuevoStock} unidades.`,
       "success"
     );
 
+    // Mostrar resumen visual
     document.getElementById("msgCompra").innerHTML = `
       <div class="message success">
         <h3>Compra realizada con éxito</h3>
@@ -302,11 +292,23 @@ async function simularCompra(event) {
         <p><strong>Hora:</strong> ${horaFormateada}</p>
       </div>
     `;
+
+    // Guardar la compra simulada en el historial
+    const compraSimulada = {
+      nombre: producto.nombre,
+      cantidad,
+      precioUnitario: producto.precio,
+      costoTotal,
+      fecha: fechaFormateada,
+      hora: horaFormateada,
+    };
+    guardarCompraEnHistorial(compraSimulada);
   } catch (error) {
     console.error(error);
     showMessage("Error al realizar la compra.", "error");
   }
 }
+
 
 
 // Cargar historial al iniciar
