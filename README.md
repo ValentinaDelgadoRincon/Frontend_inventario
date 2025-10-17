@@ -163,6 +163,12 @@ GET /videojuegos
 > Panel principal del sistema de inventario
 
 ---
+## 🎬 Video Demostrativo
+
+📹 **Demostración completa Frontend:**  
+👉 [Video Front](https://drive.google.com/file/d/1aubuVs5N4DfkaGlQYsJ-VUtTqkxnnPkZ/view?usp=drivesdk)
+
+--- 
 
 ## 👨‍💻 Autores
 
