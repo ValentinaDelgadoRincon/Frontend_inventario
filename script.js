@@ -260,20 +260,33 @@ async function simularCompra(event) {
       return;
     }
 
-    // Calcular nuevo stock
-    const nuevoStock = producto.stock + cantidad;
-    const costoTotal = producto.precio * cantidad;
+    // Preparar objeto para enviar al backend
+    const venta = {
+      productos: [
+        {
+          videojuego_id: producto._id,
+          nombre: producto.nombre,
+          cantidad,
+          precio_unitario: producto.precio,
+        },
+      ],
+    };
 
-    // Actualizar producto en el backend
-    const updateRes = await fetch(`${API_URL}/videojuegos/${producto._id}`, {
-      method: "PUT",
+    // Enviar venta al backend
+    const ventaRes = await fetch(`${API_URL}/ventas`, {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ stock: nuevoStock }),
+      body: JSON.stringify(venta),
     });
 
-    if (!updateRes.ok) {
-      throw new Error("Error al actualizar el producto en la base de datos.");
+    const ventaData = await ventaRes.json();
+
+    if (!ventaRes.ok) {
+      throw new Error(ventaData.error || "Error al registrar la compra");
     }
+
+    // Calcular costo total
+    const costoTotal = producto.precio * cantidad;
 
     // Obtener fecha y hora actual
     const fecha = new Date();
@@ -290,7 +303,7 @@ async function simularCompra(event) {
 
     // Mostrar mensaje principal
     showMessage(
-      `Compra registrada con éxito. Nuevo stock de "${producto.nombre}": ${nuevoStock} unidades.`,
+      `Compra registrada con éxito. Nuevo stock de "${producto.nombre}": actualizado en la base de datos.`,
       "success"
     );
 
@@ -302,7 +315,6 @@ async function simularCompra(event) {
         <p><strong>Cantidad comprada:</strong> ${cantidad}</p>
         <p><strong>Precio unitario:</strong> $${producto.precio.toLocaleString()}</p>
         <p><strong>Costo total:</strong> $${costoTotal.toLocaleString()}</p>
-        <p><strong>Stock nuevo (base de datos):</strong> ${nuevoStock}</p>
         <hr>
         <p><strong>Fecha:</strong> ${fechaFormateada}</p>
         <p><strong>Hora:</strong> ${horaFormateada}</p>
@@ -310,7 +322,7 @@ async function simularCompra(event) {
     `;
 
     // Guardar compra en historial (opcional)
-    const compra = {
+    const compraHistorial = {
       nombre: producto.nombre,
       cantidad,
       precioUnitario: producto.precio,
@@ -318,12 +330,13 @@ async function simularCompra(event) {
       fecha: fechaFormateada,
       hora: horaFormateada,
     };
-    guardarCompraEnHistorial(compra);
+    guardarCompraEnHistorial(compraHistorial);
   } catch (error) {
     console.error(error);
-    showMessage("Error al registrar la compra.", "error");
+    showMessage("Error al registrar la compra: " + error.message, "error");
   }
 }
+
 
 
 
