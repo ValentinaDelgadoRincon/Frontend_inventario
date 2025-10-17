@@ -28,11 +28,22 @@
             <span class="nav-icon">🔍</span> Buscar
           </a>
         </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showTab('compras')">
+            <span class="nav-icon">🛒</span> Simular Compra
+          </a>
+        </li>
+        <li class="nav-item">
+          <a class="nav-link" onclick="showTab('historialCompras')">
+            <span class="nav-icon">📜</span> Historial de Compras
+          </a>
+        </li>
+
+
       </ul>
     </nav>
 
     <div class="main-content">
-
       <!-- PRODUCTOS -->
       <div id="productos" class="tab-content">
         <div class="content-header">
@@ -44,7 +55,6 @@
             <div class="card-body">
               <form id="formProducto" onsubmit="registrarProducto(event)">
                 <div class="form-grid">
-
                   <div class="form-group">
                     <label for="nombreProd">Nombre *</label>
                     <input id="nombreProd" type="text" placeholder="Nombre del producto" required />
@@ -147,6 +157,70 @@
           </div>
         </div>
       </div>
+
+      <!-- COMPRAS -->
+      <div id="compras" class="tab-content">
+        <div class="content-header">
+          <h2>Compras</h2>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div class="card-header">Registrar Compra</div>
+            <div class="card-body">
+              <form id="formCompra" onsubmit="simularCompra(event)">
+                <div class="form-grid">
+                  <div class="form-group">
+                    <label for="nombreCompra">Nombre del producto *</label>
+                    <input id="nombreCompra" type="text" placeholder="Nombre del producto" required />
+                  </div>
+                  <div class="form-group">
+                    <label for="cantidadCompra">Cantidad *</label>
+                    <input id="cantidadCompra" type="number" min="1" placeholder="Cantidad que desea comprar"
+                      required />
+                  </div>
+                </div>
+                <div class="actions">
+                  <button type="submit" class="btn btn-success">Registrar Compra</button>
+                  <button type="button" class="btn btn-secondary" onclick="limpiarFormCompra()">Limpiar</button>
+                </div>
+              </form>
+              <div id="msgCompra"></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- HISTORIAL DE COMPRAS -->
+      <div id="historialCompras" class="tab-content">
+        <div class="content-header">
+          <h2>Historial de Compras</h2>
+        </div>
+        <div class="content-body">
+          <div class="card">
+            <div class="card-header">Registro de Compras</div>
+            <div class="card-body">
+              <table id="tablaHistorialCompras">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio Unitario</th>
+                    <th>Costo Total</th>
+                    <th>Fecha</th>
+                    <th>Hora</th>
+                  </tr>
+                </thead>
+                <tbody></tbody>
+              </table>
+              <div class="actions" style="margin-top: 15px;">
+                <button class="btn btn-danger" onclick="limpiarHistorialCompras()">🧹 Limpiar Historial</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+
     </div>
   </div>
 

@@ -165,15 +165,8 @@ async function exportarStock() {
     }
 
     const csv = [
-      [
-        "Nombre",
-        "Tipo",
-        "Precio",
-        "Stock",
-      ].join(","),
-      ...productos.map((p) =>
-        [p.nombre, p.tipo, p.precio, p.stock].join(",")
-      ),
+      ["Nombre", "Tipo", "Precio", "Stock"].join(","),
+      ...productos.map((p) => [p.nombre, p.tipo, p.precio, p.stock].join(",")),
     ].join("\n");
 
     const blob = new Blob([csv], { type: "text/csv;charset=utf-8;" });
@@ -238,11 +231,122 @@ function limpiarTodosFormularios() {
   showMessage("Todos los formularios fueron limpiados.", "info");
 }
 
-function confirmarReset() {
-  if (confirm("¿Deseas reiniciar completamente el sistema?")) {
-    localStorage.clear();
-    showMessage("Sistema reseteado completamente.", "warning");
+
+
+// Simular compra
+async function simularCompra(event) {
+  event.preventDefault();
+
+  const nombre = document.getElementById("nombreCompra").value.trim();
+  const cantidad = parseInt(document.getElementById("cantidadCompra").value);
+
+  if (!nombre || cantidad <= 0) {
+    showMessage("Completa todos los campos correctamente.", "warning");
+    return;
   }
+
+  try {
+    const res = await fetch(`${API_URL}/videojuegos`);
+    const productos = await res.json();
+    const producto = productos.find(
+      (p) => p.nombre.toLowerCase() === nombre.toLowerCase()
+    );
+
+    if (!producto) {
+      showMessage("El producto no existe en el inventario.", "error");
+      return;
+    }
+
+    // Calcular nuevo stock, costo total y fecha/hora actual
+    const nuevoStock = producto.stock + cantidad;
+    const costoTotal = producto.precio * cantidad;
+    const fecha = new Date();
+    const fechaFormateada = fecha.toLocaleDateString("es-CO", {
+      year: "numeric",
+      month: "long",
+      day: "numeric",
+    });
+    const horaFormateada = fecha.toLocaleTimeString("es-CO", {
+      hour: "2-digit",
+      minute: "2-digit",
+      second: "2-digit",
+    });
+
+    // Guardar la compra simulada en el historial
+    const compraSimulada = {
+      nombre: producto.nombre,
+      cantidad,
+      precioUnitario: producto.precio,
+      costoTotal,
+      fecha: fechaFormateada,
+      hora: horaFormateada,
+    };
+    guardarCompraEnHistorial(compraSimulada);
+
+    // Mostrar mensaje y resumen
+    showMessage(
+      `Compra realizada con éxito. Nuevo stock de "${producto.nombre}": ${nuevoStock} unidades.`,
+      "success"
+    );
+
+    document.getElementById("msgCompra").innerHTML = `
+      <div class="message success">
+        <h3>Compra realizada con éxito</h3>
+        <p><strong>Producto:</strong> ${producto.nombre}</p>
+        <p><strong>Cantidad comprada:</strong> ${cantidad}</p>
+        <p><strong>Precio unitario:</strong> $${producto.precio.toLocaleString()}</p>
+        <p><strong>Costo total:</strong> $${costoTotal.toLocaleString()}</p>
+        <p><strong>Stock nuevo (simulado):</strong> ${nuevoStock}</p>
+        <hr>
+        <p><strong>Fecha:</strong> ${fechaFormateada}</p>
+        <p><strong>Hora:</strong> ${horaFormateada}</p>
+      </div>
+    `;
+  } catch (error) {
+    console.error(error);
+    showMessage("Error al realizar la compra.", "error");
+  }
+}
+
+
+// Cargar historial al iniciar
+function cargarHistorialCompras() {
+  const historial = JSON.parse(localStorage.getItem("historialCompras")) || [];
+  const tbody = document.querySelector("#tablaHistorialCompras tbody");
+  tbody.innerHTML = "";
+
+  if (historial.length === 0) {
+    tbody.innerHTML = `<tr><td colspan="6">No hay compras registradas.</td></tr>`;
+    return;
+  }
+
+  historial.forEach((compra) => {
+    const fila = document.createElement("tr");
+    fila.innerHTML = `
+      <td>${compra.nombre}</td>
+      <td>${compra.cantidad}</td>
+      <td>$${compra.precioUnitario.toLocaleString()}</td>
+      <td>$${compra.costoTotal.toLocaleString()}</td>
+      <td>${compra.fecha}</td>
+      <td>${compra.hora}</td>
+    `;
+    tbody.appendChild(fila);
+  });
+}
+
+// Guardar compra en historial
+function guardarCompraEnHistorial(compra) {
+  const historial = JSON.parse(localStorage.getItem("historialCompras")) || [];
+  historial.push(compra);
+  localStorage.setItem("historialCompras", JSON.stringify(historial));
+  cargarHistorialCompras();
+}
+
+// Limpiar historial completo
+function limpiarHistorialCompras() {
+  localStorage.removeItem("historialCompras");
+  cargarHistorialCompras();
+  showMessage("Historial de compras limpiado.", "info");
 }
 
 //Alertas
